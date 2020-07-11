@@ -215,7 +215,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
         dataSourceDescription = <String, dynamic>{'uri': dataSource};
     }
     final Map<String, dynamic> response =
-    await _channel.invokeMapMethod<String, dynamic>(
+        await _channel.invokeMapMethod<String, dynamic>(
       'create',
       dataSourceDescription,
     );
@@ -248,6 +248,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
           _applyLooping();
           _applyVolume();
           _applyPlayPause();
+          _applySpeed();
           break;
         case 'completed':
           value = value.copyWith(isPlaying: false, position: value.duration);
@@ -339,7 +340,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
       );
       _timer = Timer.periodic(
         const Duration(milliseconds: 500),
-            (Timer timer) async {
+        (Timer timer) async {
           if (_isDisposed) {
             return;
           }
@@ -351,6 +352,8 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
         },
       );
 
+      // Ensure the video is played at the correct speed
+      await _applySpeed();
     } else {
       _timer?.cancel();
       await _channel.invokeMethod<void>(
@@ -607,11 +610,11 @@ class _VideoScrubberState extends State<_VideoScrubber> {
 /// that will also detect the gestures.
 class VideoProgressIndicator extends StatefulWidget {
   VideoProgressIndicator(
-      this.controller, {
-        VideoProgressColors colors,
-        this.allowScrubbing,
-        this.padding = const EdgeInsets.only(top: 5.0),
-      }) : colors = colors ?? VideoProgressColors();
+    this.controller, {
+    VideoProgressColors colors,
+    this.allowScrubbing,
+    this.padding = const EdgeInsets.only(top: 5.0),
+  }) : colors = colors ?? VideoProgressColors();
 
   final VideoPlayerController controller;
   final VideoProgressColors colors;
